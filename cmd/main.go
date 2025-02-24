@@ -30,5 +30,5 @@ func main() {
 	delivery.NewTaskHandler(r, useCase)
 
 	// Run the server.
-	r.Run(":8080")
+	r.Run("0.0.0.0:8080")
 }
