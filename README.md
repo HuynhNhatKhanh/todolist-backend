@@ -34,9 +34,21 @@ This is the backend service for a TodoList application, built using Golang. The 
    ```sh
    go mod tidy
    ```
+   If error "GOSUMDB=off"
+   ``sh
+   GOSUMDB=sum.golang.org go mod tidy
+   ```
+
+   ```
 3. Build the application:
    ```sh
    go build -o todolist ./cmd/main.go
+   ```
+   If error "GOSUMDB=off"
+   ``sh
+   GOSUMDB=sum.golang.org go build -o todolist ./cmd/main.go
+   ```
+
    ```
 4. Run the application:
    ```sh
