@@ -16,7 +16,8 @@ func CorsConfig() gin.HandlerFunc {
 	return cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173", "https://todolist-frontend-ten.vercel.app", "https://khanh-todolist.duckdns.org"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Content-Type", "Authorization", "X-Requested-With"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length", "Authorization"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	})
