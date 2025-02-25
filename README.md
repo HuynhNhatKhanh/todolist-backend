@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is the backend service for a TodoList application, built using Golang. The application provides a RESTful API for managing tasks.
+This is the backend service for a TodoList application, built with Golang. The application provides a RESTful API for managing tasks and is deployed on Vercel. It also connects to a backend service running on AWS EC2.
 
 ## Features
 
@@ -31,25 +31,33 @@ This is the backend service for a TodoList application, built using Golang. The 
    cd todolist-backend
    ```
 2. Install dependencies:
+
    ```sh
    go mod tidy
    ```
+
    If error "GOSUMDB=off"
    ``sh
    GOSUMDB=sum.golang.org go mod tidy
+
    ```
 
    ```
+
 3. Build the application:
+
    ```sh
    go build -o todolist ./cmd/main.go
    ```
+
    If error "GOSUMDB=off"
    ``sh
    GOSUMDB=sum.golang.org go build -o todolist ./cmd/main.go
+
    ```
 
    ```
+
 4. Run the application:
    ```sh
    ./todolist
