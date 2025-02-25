@@ -14,8 +14,8 @@ import (
 // The preflight request is cached for 12 hours.
 func CorsConfig() gin.HandlerFunc {
 	return cors.New(cors.Config{
-		// AllowOrigins:     []string{"http://localhost:5173", "https://yourdomain.com"},
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     []string{"http://localhost:5173", "https://todolist-frontend-ten.vercel.app/"},
+		// AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Content-Type", "Authorization", "X-Requested-With"},
 		AllowCredentials: true,
