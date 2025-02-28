@@ -46,11 +46,12 @@ jobs:
           # Restart Service
           sudo systemctl restart todolist-backend.service
           sleep 3
-
+          
           # Check service running
           if systemctl is-active --quiet todolist-backend.service; then
             echo "✅ Deploy Successful"
           else
             echo "❌ Deploy Failed"
+            sudo journalctl -u todolist-backend.service --since "5 minutes ago"
             exit 1
           fi
