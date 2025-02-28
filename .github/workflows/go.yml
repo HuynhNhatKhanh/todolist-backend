@@ -1,4 +1,4 @@
-# This workflow will build a golang project
+# This workflow will build and deploy a Golang project to AWS EC2 with rollback functionality
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
 name: CI/CD Golang Deploy to AWS EC2 with Rollback
@@ -16,17 +16,30 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    # Setup Golang environment
     - name: Setup Golang
       uses: actions/setup-go@v4
       with:
         go-version: '1.24.0'
 
+    # Build Golang project
     - name: Build Go Project
       run: |
         go mod tidy
         go build -o todolist-backend ./cmd/main.go
         echo "✅ Build successful"
 
+    # Upload binary to EC2 using SCP
+    - name: Upload Binary to EC2
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.AWS_EC2_HOST }}
+        username: ${{ secrets.AWS_EC2_USER }}
+        key: ${{ secrets.AWS_EC2_KEY }}
+        source: "./todolist-backend"
+        target: "/home/ubuntu/"
+
+    # Deploy project via SSH to EC2
     - name: Deploy via SSH to EC2
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -35,20 +48,36 @@ jobs:
         key: ${{ secrets.AWS_EC2_KEY }}
         script: |
           echo "🚀 Deploying code to EC2..."
+          cd /home/ubuntu/todolist-backend || mkdir /home/ubuntu/todolist-backend
           cd /home/ubuntu/todolist-backend
-          
-          # Backup old version if the file exists
+
+          # Backup old version if it exists
           if [ -f todolist-backend ]; then
             mv todolist-backend todolist-backend.bak
             echo "🗂️ Backup old version successful"
           fi
-          
-          # Upload new file from the temporary directory
+
+          # Move new binary to deployment directory
           if [ -f ~/todolist-backend ]; then
-            sudo mv ~/todolist-backend ./todolist-backend
-            sudo chmod +x todolist-backend
+            mv ~/todolist-backend ./todolist-backend
+            chmod +x todolist-backend
             sudo systemctl restart todolist-backend.service
-            echo "✅ Deploy Successful"
+            sleep 3
+
+            # Verify service status
+            if systemctl is-active --quiet todolist-backend.service; then
+              echo "✅ Deploy Successful"
+            else
+              echo "❌ Deploy Failed, rolling back..."
+              if [ -f todolist-backend.bak ]; then
+                mv todolist-backend.bak todolist-backend
+                sudo systemctl restart todolist-backend.service
+                echo "🔄 Rolled back to old version"
+              else
+                echo "🚫 No backup version found!"
+              fi
+              exit 1
+            fi
           else
             echo "❌ Deploy Failed, file not found!"
             if [ -f todolist-backend.bak ]; then
@@ -60,4 +89,3 @@ jobs:
             fi
             exit 1
           fi
-
