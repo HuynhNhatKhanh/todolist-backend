@@ -39,32 +39,27 @@ This is the backend service for a TodoList application, built using Golang. The 
    ```
 
    If error "GOSUMDB=off"
-   ``sh
+   ```sh
    GOSUMDB=sum.golang.org go mod tidy
-
    ```
 
-   ```
-
-3. Build the application:
+4. Build the application:
 
    ```sh
    go build -o todolist ./cmd/main.go
    ```
 
    If error "GOSUMDB=off"
-   ``sh
+   ```sh
    GOSUMDB=sum.golang.org go build -o todolist ./cmd/main.go
-
    ```
 
-   ```
 
-4. Run the application:
+5. Run the application:
    ```sh
    ./todolist
    ```
-
+   
 ## Docker Deployment
 
 ### Build Docker Image
@@ -97,6 +92,10 @@ docker run -p 8080:8080 todolist-backend
 | Variable | Description | Default |
 | -------- | ----------- | ------- |
 | PORT     | Server port | 8080    |
+
+## Next Features
+
+- Use MongoDB for Database
 
 ## License
 
