@@ -9,12 +9,14 @@ This is the backend service for a TodoList application, built using Golang. The 
 - Create, read, update, and delete (CRUD) todos
 - RESTful API design
 - Lightweight and efficient Golang backend
+- Continuous Integration/Continuous Deployment (CI/CD) with GitHub Actions: Automatic pull and build on merge to main
 
 ## Technologies Used
 
 - **Golang** (version 1.24.0)
 - **Debian** (minimal runtime image)
 - **Docker** (for containerization)
+- **GitHub Actions** (for CI/CD)
 
 ## Setup & Installation
 
