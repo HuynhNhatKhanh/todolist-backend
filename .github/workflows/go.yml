@@ -25,28 +25,29 @@ jobs:
         username: ${{ secrets.AWS_EC2_USER }}
         key: ${{ secrets.AWS_EC2_KEY }}
         script: |
+          export PATH=$PATH:/usr/local/go/bin
           echo "🚀 Deploying code to EC2..."
-
+          
           # Go to project folder or clone if not exists
           if [ ! -d /home/ubuntu/todolist-backend ]; then
             echo "📦 Cloning project..."
             git clone https://github.com/username/repo.git /home/ubuntu/todolist-backend
           fi
-
+        
           # Pull latest code
           cd /home/ubuntu/todolist-backend
           git pull origin main
           echo "✅ Pull latest code success"
-
+        
           # Build Golang Project on EC2
           go mod tidy
           go build -o todolist-backend ./cmd/main.go
           echo "✅ Build successful"
-
+        
           # Restart Service
           sudo systemctl restart todolist-backend.service
           sleep 3
-          
+        
           # Check service running
           if systemctl is-active --quiet todolist-backend.service; then
             echo "✅ Deploy Successful"
@@ -55,3 +56,4 @@ jobs:
             sudo journalctl -u todolist-backend.service --since "5 minutes ago"
             exit 1
           fi
+
