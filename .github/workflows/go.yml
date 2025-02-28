@@ -1,7 +1,7 @@
-# This workflow will build and deploy a Golang project to AWS EC2 without rollback
+# This workflow will build and deploy a Golang project to AWS EC2 with Rollback
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
-name: CI/CD Golang Deploy to AWS EC2
+name: CI/CD Golang Deploy to AWS EC2 with Rollback
 
 on:
   push:
@@ -13,11 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout code from repo
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # SSH into EC2 and deploy project
     - name: Deploy via SSH to EC2
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -27,33 +25,57 @@ jobs:
         script: |
           export PATH=$PATH:/usr/local/go/bin
           echo "🚀 Deploying code to EC2..."
-          
+
           # Go to project folder or clone if not exists
           if [ ! -d /home/ubuntu/todolist-backend ]; then
             echo "📦 Cloning project..."
-            git clone https://github.com/username/repo.git /home/ubuntu/todolist-backend
+            git clone git@github.com:HuynhNhatKhanh/todolist-backend.git /home/ubuntu/todolist-backend
           fi
-        
-          # Pull latest code
+
+          # Backup old binary before deploy
           cd /home/ubuntu/todolist-backend
+          if [ -f todolist-backend ]; then
+            echo "📦 Backup old binary"
+            mv todolist-backend todolist-backend.bak
+          fi
+
+          # Pull latest code via SSH
+          echo "🔑 Pulling latest code..."
           git pull origin main
           echo "✅ Pull latest code success"
-        
-          # Build Golang Project on EC2
+
+          # Build project
+          echo "🔨 Building project..."
           go mod tidy
           go build -o todolist-backend ./cmd/main.go
           echo "✅ Build successful"
-        
-          # Restart Service
+
+          # Restart service
+          echo "🔄 Restarting service..."
           sudo systemctl restart todolist-backend.service
           sleep 3
-        
-          # Check service running
+
+          # Check service status
           if systemctl is-active --quiet todolist-backend.service; then
             echo "✅ Deploy Successful"
+            # Remove backup if the deployment is successful
+            echo "🧹 Cleaning backup..."
+            rm -f todolist-backend.bak
           else
             echo "❌ Deploy Failed"
-            sudo journalctl -u todolist-backend.service --since "5 minutes ago"
-            exit 1
-          fi
+            echo "🔄 Rollback to previous version..."
 
+            if [ -f todolist-backend.bak ]; then
+              mv todolist-backend.bak todolist-backend
+              sudo systemctl restart todolist-backend.service
+              if systemctl is-active --quiet todolist-backend.service; then
+                echo "✅ Rollback Successful"
+              else
+                echo "❌ Rollback Failed - Manual intervention required"
+                exit 1
+              fi
+            else
+              echo "⚠️ No backup found! Cannot rollback."
+              exit 1
+            fi
+          fi
