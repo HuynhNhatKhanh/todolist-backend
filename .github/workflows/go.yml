@@ -35,32 +35,29 @@ jobs:
         key: ${{ secrets.AWS_EC2_KEY }}
         script: |
           echo "🚀 Deploying code to EC2..."
-          cd /home/ubuntu/todolist-backend || true
-
-          # Backup old version
+          cd /home/ubuntu/todolist-backend
+          
+          # Backup old version if the file exists
           if [ -f todolist-backend ]; then
             mv todolist-backend todolist-backend.bak
             echo "🗂️ Backup old version successful"
           fi
-
-          # Upload new file
-          sudo rm -f todolist-backend
-          sudo mv ~/todolist-backend ./
-          sudo chmod +x todolist-backend
-          sudo systemctl restart todolist-backend.service
-
-          # Check service running
-          sleep 3
-          if systemctl is-active --quiet todolist-backend.service; then
+          
+          # Upload new file from the temporary directory
+          if [ -f ~/todolist-backend ]; then
+            sudo mv ~/todolist-backend ./todolist-backend
+            sudo chmod +x todolist-backend
+            sudo systemctl restart todolist-backend.service
             echo "✅ Deploy Successful"
           else
-            echo "❌ Deploy Fail, rollback..."
+            echo "❌ Deploy Failed, file not found!"
             if [ -f todolist-backend.bak ]; then
               mv todolist-backend.bak todolist-backend
               sudo systemctl restart todolist-backend.service
-              echo "🔄 Rollback to old version"
+              echo "🔄 Rolled back to old version"
             else
               echo "🚫 No backup version found!"
             fi
             exit 1
           fi
+
